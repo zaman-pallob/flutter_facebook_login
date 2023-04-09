@@ -22,7 +22,7 @@ import io.flutter.embedding.android.FlutterActivity;
 
 
 
-public class FacebookLoginPlugins extends FlutterActivity {
+public class MainActivity extends FlutterActivity {
 
 
     private static final String CHANNEL_NAME = "com.roughike/flutter_facebook_login";

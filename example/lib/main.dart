@@ -16,20 +16,19 @@ class _MyAppState extends State<MyApp> {
   String _message = 'Log in/out by pressing the buttons below.';
 
   Future<Null> _login() async {
-    final FacebookLoginResult result =
-        await facebookSignIn.logIn(['email']);
+    final FacebookLoginResult result = await facebookSignIn.logIn(['email']);
 
     switch (result.status) {
       case FacebookLoginStatus.loggedIn:
-        final FacebookAccessToken accessToken = result.accessToken;
+        final FacebookAccessToken? accessToken = result.accessToken;
         _showMessage('''
          Logged in!
          
-         Token: ${accessToken.token}
-         User id: ${accessToken.userId}
-         Expires: ${accessToken.expires}
-         Permissions: ${accessToken.permissions}
-         Declined permissions: ${accessToken.declinedPermissions}
+         Token: ${accessToken?.token}
+         User id: ${accessToken?.userId}
+         Expires: ${accessToken?.expires}
+         Permissions: ${accessToken?.permissions}
+         Declined permissions: ${accessToken?.declinedPermissions}
          ''');
         break;
       case FacebookLoginStatus.cancelledByUser:
@@ -65,11 +64,11 @@ class _MyAppState extends State<MyApp> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               new Text(_message),
-              new RaisedButton(
+              new ElevatedButton(
                 onPressed: _login,
                 child: new Text('Log in'),
               ),
-              new RaisedButton(
+              new ElevatedButton(
                 onPressed: _logOut,
                 child: new Text('Logout'),
               ),

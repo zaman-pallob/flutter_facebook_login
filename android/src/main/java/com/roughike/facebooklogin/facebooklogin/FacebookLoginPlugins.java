@@ -1,4 +1,4 @@
-package com.roughike.facebooklogin.facebooklogin;
+package android.src.main.java.com.roughike.facebooklogin.facebooklogin;
 
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -8,13 +8,23 @@ import com.facebook.login.LoginManager;
 import java.util.List;
 import java.util.Map;
 
+import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
+import android.os.Bundle;
 
-public class FacebookLoginPlugin implements MethodCallHandler {
+import androidx.annotation.NonNull;
+
+import io.flutter.embedding.android.FlutterActivity;
+
+
+
+public class FacebookLoginPlugins extends FlutterActivity {
+
+
     private static final String CHANNEL_NAME = "com.roughike/flutter_facebook_login";
 
     private static final String ERROR_UNKNOWN_LOGIN_BEHAVIOR = "unknown_login_behavior";
@@ -33,6 +43,39 @@ public class FacebookLoginPlugin implements MethodCallHandler {
 
     private final FacebookSignInDelegate delegate;
 
+
+    @Override
+    public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+        super.configureFlutterEngine(flutterEngine);
+        new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), CHANNEL)
+                .setMethodCallHandler(
+                        (call, result) -> {
+                            String loginBehaviorStr;
+                            LoginBehavior loginBehavior;
+
+                            switch (call.method) {
+                                case METHOD_LOG_IN:
+                                    loginBehaviorStr = call.argument(ARG_LOGIN_BEHAVIOR);
+                                    loginBehavior = loginBehaviorFromString(loginBehaviorStr, result);
+                                    List<String> permissions = call.argument(ARG_PERMISSIONS);
+
+                                    delegate.logIn(loginBehavior, permissions, result);
+                                    break;
+                                case METHOD_LOG_OUT:
+                                    delegate.logOut(result);
+                                    break;
+                                case METHOD_GET_CURRENT_ACCESS_TOKEN:
+                                    delegate.getCurrentAccessToken(result);
+                                    break;
+                                default:
+                                    result.notImplemented();
+                                    break;
+                            }
+                        }
+                );
+
+    }
+
     private FacebookLoginPlugin(Registrar registrar) {
         delegate = new FacebookSignInDelegate(registrar);
     }
@@ -43,30 +86,7 @@ public class FacebookLoginPlugin implements MethodCallHandler {
         channel.setMethodCallHandler(plugin);
     }
 
-    @Override
-    public void onMethodCall(MethodCall call, Result result) {
-        String loginBehaviorStr;
-        LoginBehavior loginBehavior;
 
-        switch (call.method) {
-            case METHOD_LOG_IN:
-                loginBehaviorStr = call.argument(ARG_LOGIN_BEHAVIOR);
-                loginBehavior = loginBehaviorFromString(loginBehaviorStr, result);
-                List<String> permissions = call.argument(ARG_PERMISSIONS);
-
-                delegate.logIn(loginBehavior, permissions, result);
-                break;
-            case METHOD_LOG_OUT:
-                delegate.logOut(result);
-                break;
-            case METHOD_GET_CURRENT_ACCESS_TOKEN:
-                delegate.getCurrentAccessToken(result);
-                break;
-            default:
-                result.notImplemented();
-                break;
-        }
-    }
 
     private LoginBehavior loginBehaviorFromString(String loginBehavior, Result result) {
         switch (loginBehavior) {
@@ -126,14 +146,4 @@ public class FacebookLoginPlugin implements MethodCallHandler {
         }
     }
 }
-//import android.os.Bundle;
-//
-//        import io.flutter.embedding.android.FlutterActivity;
-//
-//
-//public class MainActivity extends FlutterActivity {
-//    @Override
-//    protected void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//    }
-//}
+

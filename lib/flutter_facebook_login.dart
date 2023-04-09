@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_null_comparison
+
 import 'dart:async';
 
 import 'package:collection/collection.dart';
@@ -38,7 +40,7 @@ import 'src/clock.dart';
 class FacebookLogin {
   static const channel = MethodChannel('com.roughike/flutter_facebook_login');
 
-  FacebookLoginBehavior _loginBehavior =
+  FacebookLoginBehavior? _loginBehavior =
       FacebookLoginBehavior.nativeWithFallback;
 
   /// Controls how the login dialog should be presented.
@@ -50,7 +52,7 @@ class FacebookLogin {
   /// is taken into account just before the login dialog is about to show.
   ///
   /// Ignored on iOS, as it's not supported by the iOS Facebook Login SDK anymore.
-  set loginBehavior(FacebookLoginBehavior behavior) {
+  set loginBehavior(FacebookLoginBehavior? behavior) {
     assert(behavior != null, 'The login behavior cannot be null.');
     _loginBehavior = behavior;
   }
@@ -82,7 +84,7 @@ class FacebookLogin {
   ///
   /// NOTE: This might return an access token that has expired. If you need to be
   /// sure that the token is still valid, call [isValid] on the access token.
-  Future<FacebookAccessToken> get currentAccessToken async {
+  Future<FacebookAccessToken?> get currentAccessToken async {
     final Map<dynamic, dynamic> accessToken =
         await channel.invokeMethod('getCurrentAccessToken');
 
@@ -104,8 +106,7 @@ class FacebookLogin {
   Future<FacebookLoginResult> logIn(
     List<String> permissions,
   ) async {
-    final Map<dynamic, dynamic> result =
-        await channel.invokeMethod('logIn', {
+    final Map<dynamic, dynamic> result = await channel.invokeMethod('logIn', {
       'behavior': _currentLoginBehaviorAsString(),
       'permissions': permissions,
     });
@@ -138,9 +139,9 @@ class FacebookLogin {
         return 'webOnly';
       case FacebookLoginBehavior.webViewOnly:
         return 'webViewOnly';
+      default:
+        throw StateError('Invalid login behavior.');
     }
-
-    throw StateError('Invalid login behavior.');
   }
 
   /// There's a weird bug where calling Navigator.push (or any similar method)
@@ -212,7 +213,7 @@ class FacebookLoginResult {
   ///
   /// Only available when the [status] equals [FacebookLoginStatus.loggedIn],
   /// otherwise null.
-  final FacebookAccessToken accessToken;
+  final FacebookAccessToken? accessToken;
 
   /// The error message when the log in flow completed with an error.
   ///
